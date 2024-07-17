@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/starudream/go-lib/cobra/v2"
 	"github.com/starudream/go-lib/core/v2/slog"
@@ -25,13 +27,23 @@ var cronCmd = cobra.NewCommand(func(c *cobra.Command) {
 
 func init() {
 	rootCmd.AddCommand(cronCmd)
+	rand.Seed(time.Now().UnixNano()) // 初始化随机种子
+}
+
+func randomDuration(maxOffsetHours int) time.Duration {
+	offset := rand.Intn(maxOffsetHours * 3600) // 生成随机秒数
+	return time.Duration(offset) * time.Second
 }
 
 func cronRun() error {
 	if config.C().Cron.Startup {
 		cronJob()
 	}
-	err := cron.AddJob(config.C().Cron.Spec, "miyoushe-cron", cronJob)
+	err := cron.AddJob(config.C().Cron.Spec, "miyoushe-cron", func() {
+		delay := randomDuration(6) // 生成一个最大为6小时的随机延迟
+		time.Sleep(delay)          // 等待计算出的延迟时间
+		cronJob()
+	})
 	if err != nil {
 		return fmt.Errorf("add cron job error: %w", err)
 	}
