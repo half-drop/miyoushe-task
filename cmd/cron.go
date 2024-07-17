@@ -40,7 +40,7 @@ func cronRun() error {
 		cronJob()
 	}
 	err := cron.AddJob(config.C().Cron.Spec, "miyoushe-cron", func() {
-		delay := randomDuration(6) // 生成一个最大为6小时的随机延迟
+		delay := randomDuration(1) // 生成一个最大为1小时的随机延迟
 		time.Sleep(delay)          // 等待计算出的延迟时间
 		cronJob()
 	})
